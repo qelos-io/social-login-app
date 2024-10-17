@@ -16,6 +16,7 @@
     "fastify-cookie": "^5.7.0",
     "fastify-session": "^5.2.1",
     "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
     "tsx": "^4.19.1"
   },
   "devDependencies": {

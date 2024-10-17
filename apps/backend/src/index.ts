@@ -1,15 +1,21 @@
 import fastify from 'fastify';
-import fetch from 'node-fetch';
+// import fetch from 'node-fetch';
 import { adminSdk, QELOS_APP_URL } from './sdk';
 import QelosSDK from '@qelos/sdk';
 import jwt from 'jsonwebtoken';
 require('dotenv').config();
+
+interface TokenData {
+  id_token: string
+}
+
 
 const app = fastify({ logger: true });
 const clientId = process.env.LINKEDIN_CLIENT_ID;
 const redirectUri = process.env.LINKEDIN_REDIRECT_URI;
 const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
+
 
 app.get('/api/login', async (request, reply) => {
   // Check for the presence of the authorization code
@@ -60,7 +66,7 @@ app.get('/api/login', async (request, reply) => {
     }
 
     // Parse the token data from the response
-    const tokenData = await tokenResponse.json();
+    const tokenData = await tokenResponse.json() as TokenData;;
     console.log('Token response:', tokenData);
 
     const idToken = tokenData.id_token;
