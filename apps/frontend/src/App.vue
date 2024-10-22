@@ -5,7 +5,7 @@ const response = ref<string | null>(null);
 
 function startLinkedInAuthorization() {
   fetch('/api/login', {
-    method: 'GET',
+    method: 'POST',
   })
     .then(response => response.json())
     .then(({ redirectUrl }) => {
