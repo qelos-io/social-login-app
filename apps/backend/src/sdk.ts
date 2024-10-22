@@ -17,5 +17,5 @@ adminSdk.authentication.oAuthSignin({ username: USERNAME, password: PASSWORD })
     console.log('signin success to qelos');
   })
   .catch((err) => {
-    console.error('signin failed:', err); 
+    console.error('signin failed:', err);
   });
