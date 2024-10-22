@@ -4,12 +4,25 @@ import { adminSdk, QELOS_APP_URL } from './sdk';
 import QelosSDK from '@qelos/sdk';
 import jwt from 'jsonwebtoken';
 require('dotenv').config();
+import crypto from 'crypto';
+import passwordGenerator from 'password-generator'; 
 
 const app = fastify({ logger: true });
 const clientId = process.env.LINKEDIN_CLIENT_ID;
 const redirectUri = process.env.LINKEDIN_REDIRECT_URI;
 const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
+
+function generateSecurePassword(length: number): string {
+  return passwordGenerator(length, false, /[a-zA-Z0-9]/);
+}
+
+// Function to hash a password using crypto.createHash
+function hashPassword(password: string): string {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+
 
 app.get('/api/login', (request, reply) => {
 
@@ -76,21 +89,25 @@ app.get('/api/auth/callback', async (request, reply) => {
 
     const newSdk = new QelosSDK({ fetch: fetch, appUrl: QELOS_APP_URL });
     let authData;
-
+  
+    // const randomPassword = generateSecurePassword(16); 
+    // const hashedPassword = hashPassword(randomPassword);
+  
+    const hashedPassword = 'dummyPassword'
     try {
-      authData = await newSdk.authentication.oAuthSignin({ username: email, password: 'dummyPassword' });
+      authData = await newSdk.authentication.oAuthSignin({ username: email, password: hashedPassword });
     } catch (err) {
       console.log('User not found, creating new user in Qelos');
       await adminSdk.users.create({
         email,
         roles: ['user'],
         username: email,
-        password: 'dummyPassword',
+        password: hashedPassword,
         firstName: firstName || 'FirstName',
         lastName: lastName || 'LastName',
       });
 
-      authData = await newSdk.authentication.oAuthSignin({ username: email, password: 'dummyPassword' });
+      authData = await newSdk.authentication.oAuthSignin({ username: email, password: hashedPassword });
     }
 
     const redirectUrl = `${QELOS_APP_URL}/auth/callback?rt=${authData.payload.refreshToken}`;
