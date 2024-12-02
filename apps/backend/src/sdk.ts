@@ -1,4 +1,5 @@
 import QelosAdministratorSDK from '@qelos/sdk/dist/administrator';
+
 require('dotenv').config();
 
 export const QELOS_APP_URL = process.env.QELOS_APP_URL || 'http://localhost:3000/';
