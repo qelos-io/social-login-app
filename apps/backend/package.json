@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node --import tsx --watch src/index.ts"
+    "dev": "node --import tsx --watch src/index.ts",
+    "start": "node --import tsx src/index.ts"
   },
   "keywords": [],
   "author": "",

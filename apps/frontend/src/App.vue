@@ -1,51 +1,39 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const response = ref<string | null>(null);
+const response = ref<string>();
+const err = ref<boolean>(false);
 
 function startLinkedInAuthorization() {
   fetch('/api/login', {
     method: 'POST',
   })
-    .then(response => response.json())
-    .then(({ redirectUrl }) => {
-      if (redirectUrl) {
-        console.log('redirectUrl frontend', redirectUrl)
-        // Redirect the user to the received URL
-        location.href = redirectUrl;
-      } else {
-        console.error('Redirect URL missing from the response');
-      }
-    })
-    .catch(error => {
-      console.error('Failed to fetch authorization URL:', error);
-    });
+      .then(response => response.json())
+      .then(({ redirectUrl }) => {
+        if (redirectUrl) {
+          console.log('redirectUrl frontend', redirectUrl)
+          // Redirect the user to the received URL
+          location.href = redirectUrl;
+        } else {
+          err.value = true;
+          console.error('Redirect URL missing from the response');
+        }
+      })
+      .catch(() => {
+        err.value = true;
+      });
 }
 </script>
 
 <template>
-  <div>
+  <div class="box">
     <button class="linkedin-btn" @click="startLinkedInAuthorization">
       Login with LinkedIn
     </button>
     <div v-if="response">{{ response }}</div>
+    <div v-if="err" class="error">Something went wrong.</div>
   </div>
 </template>
-
-<style scoped>
-form {
-  display: flex;
-  flex-direction: column;
-}
-</style>
-
-
-<style scoped>
-form {
-  display: flex;
-  flex-direction: column;
-}
-</style>
 
 <style scoped>
 form {
@@ -67,25 +55,21 @@ button {
   justify-content: center;
   background-color: #0077b5;
   color: white;
-  font-weight: bold;
-  font-size: 28px;
+  font-weight: normal;
+  font-size: 18px;
 
-  padding: 15px 20px;
-  ;
+  padding: 15px 20px;;
   margin-top: 20px;
   border-radius: 5px;
   border: none;
   cursor: pointer;
 }
 
-.linkedin-icon {
-  width: 28px;
-  height: 28px;
-  margin-right: 10px;
-  fill: white;
-}
-
 .linkedin-btn:hover {
   background-color: #005582;
+}
+
+.error {
+  color: #da8686;
 }
 </style>
