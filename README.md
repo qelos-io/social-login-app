@@ -2,6 +2,17 @@
 
 ## guide
 
+confure those variables:
+```
+LINKEDIN_CLIENT_ID=
+LINKEDIN_REDIRECT_URI=http://localhost:5173/api/auth/callback/linkedin
+LINKEDIN_CLIENT_SECRET=
+QELOS_APP_URL=
+QELOS_PASSWORD=
+QELOS_USERNAME=
+PORT=5500
+```
+
 ```sh
 $ pnpm i -r
 $ pnpm dev
