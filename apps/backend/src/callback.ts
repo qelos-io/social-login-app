@@ -38,6 +38,11 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
 			client_secret: clientSecret || '',
 		});
 
+    let tokenData;
+		let idToken;
+		let userData;
+		let redirectUrl;
+
 		try {
 			const tokenResponse = await fetch(tokenUrl, {
 				method: 'POST',
@@ -47,37 +52,40 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
 				body: bodyParams.toString(),
 			});
 
+
+			tokenData = await tokenResponse.json();
+			idToken = tokenData.id_token;
+
 			if (!tokenResponse.ok) {
 				return reply.status(500).send({ error: 'Failed to retrieve access token' });
 			}
+		} catch (error) {
+			reply.status(500).send({ error: 'Failed to retrieve access token from LinkedIn' });
+		}
 
-			const tokenData = await tokenResponse.json();
-			const idToken = tokenData.id_token;
-			let userData;
-
-			try {
-				userData = jwt.decode(idToken);
-				if (!userData || !userData.email) {
-					throw new Error('Invalid token data: missing email');
-				}
-			} catch (error) {
-				return reply.status(500).send({ error: 'Failed to decode token' });
+		try {
+			userData = jwt.decode(idToken);
+			if (!userData || !userData.email) {
+				throw new Error('Invalid token data: missing email');
 			}
+		} catch (error) {
+			return reply.status(500).send({ error: 'Failed to decode token' });
+		}
 
-			const email = userData.email;
-			const firstName = userData.given_name;
-			const lastName = userData.family_name;
+		const email = userData.email;
+		const firstName = userData.given_name;
+		const lastName = userData.family_name;
+		const newSdk = new QelosSDK({ fetch: fetch, appUrl: QELOS_APP_URL });
+		const randomPassword = generateSecurePassword(16);
+		const hashedPassword = hashPassword(randomPassword);
 
-			const newSdk = new QelosSDK({ fetch: fetch, appUrl: QELOS_APP_URL });
-			let authData;
-
-			const randomPassword = generateSecurePassword(16);
-			const hashedPassword = hashPassword(randomPassword);
-
-			try {
-				authData = await newSdk.authentication.oAuthSignin({ username: email, password: hashedPassword });
-			} catch (err) {
-				await adminSdk.users.create({
+		try {
+			const [existingUser] = await adminSdk.users.getList({username: email, exact: true});
+			if (existingUser) {
+				await adminSdk.users.update(existingUser._id, {password: hashedPassword})
+        await adminSdk.users.setEncryptedData(existingUser._id, 'linkedinToken', tokenData);
+			} else {
+				const newUser = await adminSdk.users.create({
 					email,
 					roles: ['user'],
 					username: email,
@@ -85,15 +93,14 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
 					firstName: firstName || 'FirstName',
 					lastName: lastName || 'LastName',
 				});
-
-				authData = await newSdk.authentication.oAuthSignin({ username: email, password: hashedPassword });
+        await adminSdk.users.setEncryptedData(newUser._id, 'linkedinToken', tokenData);
 			}
-
-			const redirectUrl = `${QELOS_APP_URL}/auth/callback?rt=${authData.payload.refreshToken}`;
-
-			reply.redirect(redirectUrl);
-		} catch (error) {
-			reply.status(500).send({ error: 'Failed to retrieve access token from LinkedIn' });
+			const authData = await newSdk.authentication.oAuthSignin({ username: email, password: hashedPassword });
+      redirectUrl = `${QELOS_APP_URL}/auth/callback?rt=${authData.payload.refreshToken}`;
+		} catch (err) {
+			return reply.status(500).send({ error: 'Failed to create the user' });
 		}
+
+		reply.redirect(redirectUrl);
 	});
 }
