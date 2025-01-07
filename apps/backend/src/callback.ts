@@ -96,10 +96,16 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
         await adminSdk.users.setEncryptedData(newUser._id, 'linkedinToken', tokenData);
 			}
 			const authData = await newSdk.authentication.oAuthSignin({ username: email, password: hashedPassword });
-      redirectUrl = `${QELOS_APP_URL}/auth/callback?rt=${authData.payload.refreshToken}`;
+      if (authData.payload.refreshToken) {
+        redirectUrl = `${QELOS_APP_URL}/auth/callback?rt=${authData.payload.refreshToken}`;
+      }
 		} catch (err) {
 			return reply.status(500).send({ error: 'Failed to create the user' });
 		}
+
+    if (!redirectUrl) {
+      return reply.status(500).send({ error: 'failed to login to qelos after linkedin auth as ' + firstName });
+    }
 
 		reply.redirect(redirectUrl);
 	});
