@@ -19,7 +19,7 @@ if (existsSync(dist)) {
   });
 }
 
-app.listen({ port: Number(process.env.PORT || 5500), host: 'localhost' }, (err, address) => {
+app.listen({ port: Number(process.env.PORT || 5500) }, (err, address) => {
   if (err) {
     app.log.error(err);
     process.exit(1);
