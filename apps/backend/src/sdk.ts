@@ -13,6 +13,7 @@ if (!process.env.QELOS_APP_URL || !process.env.QELOS_USERNAME || !process.env.QE
 
 export const adminSdk = new QelosAdministratorSDK({ fetch: fetch, appUrl: QELOS_APP_URL });
 
+console.log('login to qelos', QELOS_APP_URL);
 adminSdk.authentication.oAuthSignin({ username: USERNAME, password: PASSWORD })
   .then(() => {
     console.log('signin success to qelos');

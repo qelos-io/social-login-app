@@ -13,12 +13,11 @@
   "dependencies": {
     "@qelos/sdk": "^3.6.5",
     "dotenv": "^16.4.5",
-    "fastify": "^5.0.0",
-    "fastify-cookie": "^5.7.0",
+    "fastify": "^5.2.1",
+    "@fastify/cookie": "^11.0.2",
     "fastify-session": "^5.2.1",
-    "fastify-static": "^4.7.0",
+    "@fastify/static": "^8.0.3",
     "jsonwebtoken": "^9.0.2",
-    "node-fetch": "^3.3.2",
     "tsx": "^4.19.1"
   },
   "devDependencies": {

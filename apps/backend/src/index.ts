@@ -14,7 +14,7 @@ const dist = path.join(__dirname, '../../frontend/dist')
 
 if (existsSync(dist)) {
   console.log('Serving static files from dist folder');
-  app.register(require('fastify-static'), {
+  app.register(require('@fastify/static'), {
     root: dist
   });
 }
