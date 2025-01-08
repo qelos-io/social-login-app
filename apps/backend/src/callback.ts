@@ -78,13 +78,20 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
 		const newSdk = new QelosSDK({ fetch: fetch, appUrl: QELOS_APP_URL });
 		const randomPassword = generateSecurePassword(16);
 		const hashedPassword = hashPassword(randomPassword);
+    let step = 0;
 
 		try {
+      step = 1;
 			const [existingUser] = await adminSdk.users.getList({username: email, exact: true});
+      step = 2;
 			if (existingUser) {
-				await adminSdk.users.update(existingUser._id, {password: hashedPassword})
-        await adminSdk.users.setEncryptedData(existingUser._id, 'linkedinToken', tokenData);
+				await Promise.all([
+					adminSdk.users.update(existingUser._id, {password: hashedPassword}),
+					adminSdk.users.setEncryptedData(existingUser._id, 'linkedinToken', tokenData)
+				]);
+        step = 3;
 			} else {
+        step = 4;
 				const newUser = await adminSdk.users.create({
 					email,
 					roles: ['user'],
@@ -93,14 +100,23 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
 					firstName: firstName || 'FirstName',
 					lastName: lastName || 'LastName',
 				});
-        await adminSdk.users.setEncryptedData(newUser._id, 'linkedinToken', tokenData);
+        step = 5; 
+				await adminSdk.users.setEncryptedData(newUser._id, 'linkedinToken', tokenData);
+        step = 6;
 			}
-			const authData = await newSdk.authentication.oAuthSignin({ username: email, password: hashedPassword });
-      if (authData.payload.refreshToken) {
-        redirectUrl = `${QELOS_APP_URL}/auth/callback?rt=${authData.payload.refreshToken}`;
-      }
 		} catch (err) {
-			return reply.status(500).send({ error: 'Failed to create the user' });
+			return reply.status(500).send({ error: 'Failed to create or update the user', step });
+		}
+
+		try {
+      step = 7;
+			const authData = await newSdk.authentication.oAuthSignin({ username: email, password: hashedPassword });
+      step = 8;
+			if (authData.payload.refreshToken) {
+				redirectUrl = `${QELOS_APP_URL}/auth/callback?rt=${authData.payload.refreshToken}`;
+			}
+		} catch (err) {
+			return reply.status(500).send({ error: 'Failed to authenticate the user', step });
 		}
 
     if (!redirectUrl) {
