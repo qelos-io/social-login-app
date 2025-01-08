@@ -11,7 +11,7 @@ if (!process.env.QELOS_APP_URL || !process.env.QELOS_USERNAME || !process.env.QE
   throw new Error('Environment variables QELOS_APP_URL, QELOS_USERNAME, and QELOS_PASSWORD must be defined');
 }
 
-export const adminSdk = new QelosAdministratorSDK({ fetch: fetch, appUrl: QELOS_APP_URL });
+export const adminSdk = new QelosAdministratorSDK({ fetch: fetch, appUrl: QELOS_APP_URL, forceRefresh: true });
 
 console.log('login to qelos', QELOS_APP_URL);
 adminSdk.authentication.oAuthSignin({ username: USERNAME, password: PASSWORD })
