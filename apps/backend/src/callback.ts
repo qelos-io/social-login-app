@@ -73,6 +73,11 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
 		}
 
 		const email = userData.email;
+
+		if (!email) {
+			return reply.status(500).send({ error: 'Failed to get email from linkedin' });
+		}
+
 		const firstName = userData.given_name;
 		const lastName = userData.family_name;
 		const newSdk = new QelosSDK({ fetch: fetch, appUrl: QELOS_APP_URL });
@@ -105,7 +110,7 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
         step = 6;
 			}
 		} catch (err) {
-			return reply.status(500).send({ error: 'Failed to create or update the user', step });
+			return reply.status(500).send({ error: 'Failed to create or update the user for email ***@' + email.split('@')[1], step });
 		}
 
 		try {
