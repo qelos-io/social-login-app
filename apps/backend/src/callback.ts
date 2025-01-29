@@ -90,11 +90,11 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
       const [existingUser] = await adminSdk.users.getList({ username: email, exact: true });
       step = 2;
       if (existingUser) {
-        const metadata = { ...(existingUser.metadata as any || {}), ...(userData as any) }
+        const metadata = userData || {}
         await Promise.all([
           adminSdk.users.update(existingUser._id, {
             password: hashedPassword,
-            metadata,
+            internalMetadata: metadata,
           }),
           adminSdk.users.setEncryptedData(existingUser._id, 'linkedinToken', tokenData)
         ]);
@@ -108,7 +108,8 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
           password: hashedPassword,
           firstName: firstName || 'FirstName',
           lastName: lastName || 'LastName',
-          metadata: { ...userData }
+          metadata: {},
+          internalMetadata: { ...userData }
         });
         step = 5;
         await adminSdk.users.setEncryptedData(newUser._id, 'linkedinToken', tokenData);
