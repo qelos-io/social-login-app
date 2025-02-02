@@ -95,6 +95,7 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
           adminSdk.users.update(existingUser._id, {
             password: hashedPassword,
             internalMetadata: metadata,
+            profileImage: userData?.profileImage,
           }),
           adminSdk.users.setEncryptedData(existingUser._id, 'linkedinToken', tokenData)
         ]);
@@ -108,6 +109,7 @@ export default async function callbackRoutesLinkedin(app: FastifyInstance) {
           password: hashedPassword,
           firstName: firstName || 'FirstName',
           lastName: lastName || 'LastName',
+          profileImage: userData?.profileImage,
           metadata: {},
           internalMetadata: { ...userData }
         });
